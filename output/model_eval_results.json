@@ -1,0 +1,466 @@
+{
+  "summary": {
+    "qwen2.5:1.5b": {
+      "total": 24,
+      "pass_first_try": 17,
+      "pass_after_retry": 2,
+      "failed_parse": 0,
+      "failed_content": 5,
+      "success_rate_first_try": 0.7083,
+      "success_rate_with_retry": 0.7917,
+      "error_breakdown": {
+        "hallucinated_currency": 1,
+        "hallucinated_email": 2,
+        "hallucinated_refund_amount": 1,
+        "missed_currency": 1,
+        "wrong_email": 1,
+        "wrong_name": 1,
+        "wrong_refund_amount": 1
+      },
+      "category_breakdown": {
+        "happy_path": {
+          "pass": 1
+        },
+        "missing_email": {
+          "fail_content": 1,
+          "hallucinated_email": 1
+        },
+        "missing_name": {
+          "pass": 1
+        },
+        "missing_amount": {
+          "pass_after_retry": 1
+        },
+        "multiple_amounts": {
+          "pass": 1
+        },
+        "multiple_emails": {
+          "pass": 1
+        },
+        "forwarded_chain": {
+          "pass": 1
+        },
+        "signature_noise": {
+          "pass": 1
+        },
+        "negation": {
+          "fail_content": 1,
+          "missed_currency": 1
+        },
+        "refund_denied": {
+          "pass": 1
+        },
+        "multilingual": {
+          "pass": 1
+        },
+        "ocr_noise": {
+          "pass": 1
+        },
+        "written_amount": {
+          "pass": 1
+        },
+        "currency_symbol_only": {
+          "pass": 1
+        },
+        "two_customers": {
+          "pass_after_retry": 1
+        },
+        "quoted_reply": {
+          "fail_content": 1,
+          "wrong_name": 1,
+          "wrong_email": 1,
+          "wrong_refund_amount": 1
+        },
+        "invalid_email_text": {
+          "fail_content": 1,
+          "hallucinated_email": 1
+        },
+        "special_name_chars": {
+          "pass": 1
+        },
+        "extra_json_bait": {
+          "pass": 1
+        },
+        "irrelevant_refund_word": {
+          "fail_content": 1,
+          "hallucinated_refund_amount": 1,
+          "hallucinated_currency": 1
+        },
+        "multiple_currencies": {
+          "pass": 1
+        },
+        "null_expected": {
+          "pass": 1
+        },
+        "decimal_precision": {
+          "pass": 1
+        },
+        "markdown_noise": {
+          "pass": 1
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC01",
+      "category": "happy_path",
+      "description": "Clean single refund request",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"Priya Sharma\", \"email\": \"priya.sharma@gmail.com\", \"refund_amount\": 24.99, \"currency\": \"USD\"}",
+      "predicted": "{\"name\": \"Priya Sharma\", \"email\": \"priya.sharma@gmail.com\", \"refund_amount\": 24.99, \"currency\": \"USD\"}",
+      "raw_first_attempt": "{\n  \"name\": \"Priya Sharma\",\n  \"email\": \"priya.sharma@gmail.com\",\n  \"refund_amount\": 24.99,\n  \"currency\": \"USD\"\n}",
+      "raw_second_attempt": null
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC02",
+      "category": "missing_email",
+      "description": "Missing email",
+      "status": "fail_content",
+      "attempt_count": 2,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "hallucinated_email",
+      "expected": "{\"name\": \"Ramesh Kumar\", \"email\": null, \"refund_amount\": 499.0, \"currency\": \"INR\"}",
+      "predicted": "{\"name\": \"Ramesh Kumar\", \"email\": \"ramesh.kumar@example.com\", \"refund_amount\": 499.0, \"currency\": \"INR\"}",
+      "raw_first_attempt": "{\n  \"name\": \"Ramesh Kumar\",\n  \"email\": \"ramesh.kumar@gmail.com\",\n  \"refund_amount\": null,\n  \"currency\": \"INR\"\n}",
+      "raw_second_attempt": "{\n  \"name\": \"Ramesh Kumar\",\n  \"email\": \"ramesh.kumar@example.com\",\n  \"refund_amount\": 499,\n  \"currency\": \"INR\"\n}"
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC03",
+      "category": "missing_name",
+      "description": "Missing name but email present",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": null, \"email\": \"user_88@yahoo.com\", \"refund_amount\": 15.5, \"currency\": \"USD\"}",
+      "predicted": "{\"name\": null, \"email\": \"user_88@yahoo.com\", \"refund_amount\": 15.5, \"currency\": \"USD\"}",
+      "raw_first_attempt": "{\n  \"name\": null,\n  \"email\": \"user_88@yahoo.com\",\n  \"refund_amount\": 15.50,\n  \"currency\": \"USD\"\n}",
+      "raw_second_attempt": null
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC04",
+      "category": "missing_amount",
+      "description": "Amount absent",
+      "status": "pass_after_retry",
+      "attempt_count": 2,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"Kavya Rao\", \"email\": \"kavya.rao@outlook.com\", \"refund_amount\": null, \"currency\": null}",
+      "predicted": "{\"name\": \"Kavya Rao\", \"email\": \"kavya.rao@outlook.com\", \"refund_amount\": null, \"currency\": null}",
+      "raw_first_attempt": "{\n  \"name\": \"Kavya Rao\",\n  \"email\": \"kavya.rao@outlook.com\",\n  \"refund_amount\": null,\n  \"currency\": \"INR\"\n}",
+      "raw_second_attempt": "{\n  \"name\": \"Kavya Rao\",\n  \"email\": \"kavya.rao@outlook.com\",\n  \"refund_amount\": null,\n  \"currency\": null\n}"
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC05",
+      "category": "multiple_amounts",
+      "description": "Old amount and requested amount both present",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"Arjun Mehta\", \"email\": \"arjun.m@proton.me\", \"refund_amount\": 20.0, \"currency\": \"USD\"}",
+      "predicted": "{\"name\": \"Arjun Mehta\", \"email\": \"arjun.m@proton.me\", \"refund_amount\": 20.0, \"currency\": \"USD\"}",
+      "raw_first_attempt": "{\n  \"name\": \"Arjun Mehta\",\n  \"email\": \"arjun.m@proton.me\",\n  \"refund_amount\": 20,\n  \"currency\": \"USD\"\n}",
+      "raw_second_attempt": null
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC06",
+      "category": "multiple_emails",
+      "description": "Requester email and support email both present",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"Nisha Verma\", \"email\": \"customer.nisha@gmail.com\", \"refund_amount\": 899.0, \"currency\": \"INR\"}",
+      "predicted": "{\"name\": \"Nisha Verma\", \"email\": \"customer.nisha@gmail.com\", \"refund_amount\": 899.0, \"currency\": \"INR\"}",
+      "raw_first_attempt": "{\n  \"name\": \"Nisha Verma\",\n  \"email\": \"customer.nisha@gmail.com\",\n  \"refund_amount\": 899,\n  \"currency\": \"INR\"\n}",
+      "raw_second_attempt": null
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC07",
+      "category": "forwarded_chain",
+      "description": "Latest message should win over old quoted content",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"Sneha Iyer\", \"email\": \"sneha.iyer@gmail.com\", \"refund_amount\": 45.0, \"currency\": \"USD\"}",
+      "predicted": "{\"name\": \"Sneha Iyer\", \"email\": \"sneha.iyer@gmail.com\", \"refund_amount\": 45.0, \"currency\": \"USD\"}",
+      "raw_first_attempt": "{\n  \"name\": \"Sneha Iyer\",\n  \"email\": \"sneha.iyer@gmail.com\",\n  \"refund_amount\": 45.0,\n  \"currency\": \"USD\"\n}",
+      "raw_second_attempt": null
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC08",
+      "category": "signature_noise",
+      "description": "Agent signature should not be extracted",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"Mohan Babu\", \"email\": \"mohanbabu@icloud.com\", \"refund_amount\": 32.0, \"currency\": \"EUR\"}",
+      "predicted": "{\"name\": \"Mohan Babu\", \"email\": \"mohanbabu@icloud.com\", \"refund_amount\": 32.0, \"currency\": \"EUR\"}",
+      "raw_first_attempt": "{\n  \"name\": \"Mohan Babu\",\n  \"email\": \"mohanbabu@icloud.com\",\n  \"refund_amount\": 32.0,\n  \"currency\": \"EUR\"\n}",
+      "raw_second_attempt": null
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC09",
+      "category": "negation",
+      "description": "Do not pick denied refund as successful amount unless extracting requested/refund amount from context",
+      "status": "fail_content",
+      "attempt_count": 2,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "missed_currency",
+      "expected": "{\"name\": \"Harish\", \"email\": \"harish123@gmail.com\", \"refund_amount\": 40.0, \"currency\": \"USD\"}",
+      "predicted": "{\"name\": \"Harish\", \"email\": \"harish123@gmail.com\", \"refund_amount\": 40.0, \"currency\": null}",
+      "raw_first_attempt": "{\n  \"name\": \"Harish\",\n  \"email\": \"harish123@gmail.com\",\n  \"refund_amount\": 40,\n  \"currency\": null\n}",
+      "raw_second_attempt": "{\n  \"name\": \"Harish\",\n  \"email\": \"harish123@gmail.com\",\n  \"refund_amount\": 40.0,\n  \"currency\": null\n}"
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC10",
+      "category": "refund_denied",
+      "description": "Refund denied but amount mentioned",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"Meera Nair\", \"email\": \"meera.nair@gmail.com\", \"refund_amount\": 18.0, \"currency\": \"USD\"}",
+      "predicted": "{\"name\": \"Meera Nair\", \"email\": \"meera.nair@gmail.com\", \"refund_amount\": 18.0, \"currency\": \"USD\"}",
+      "raw_first_attempt": "{\n  \"name\": \"Meera Nair\",\n  \"email\": \"meera.nair@gmail.com\",\n  \"refund_amount\": 18.0,\n  \"currency\": \"USD\"\n}",
+      "raw_second_attempt": null
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC11",
+      "category": "multilingual",
+      "description": "English plus Hindi/Indian language context",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"Rohit Gupta\", \"email\": \"roh_it@rediffmail.com\", \"refund_amount\": 250.0, \"currency\": \"INR\"}",
+      "predicted": "{\"name\": \"Rohit Gupta\", \"email\": \"roh_it@rediffmail.com\", \"refund_amount\": 250.0, \"currency\": \"INR\"}",
+      "raw_first_attempt": "{\n  \"name\": \"Rohit Gupta\",\n  \"email\": \"roh_it@rediffmail.com\",\n  \"refund_amount\": 250,\n  \"currency\": \"INR\"\n}",
+      "raw_second_attempt": null
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC12",
+      "category": "ocr_noise",
+      "description": "Broken spacing and OCR noise",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"Pooja S.\", \"email\": \"pooja.singh@gmail.com\", \"refund_amount\": 25.0, \"currency\": \"USD\"}",
+      "predicted": "{\"name\": \"Pooja S.\", \"email\": \"pooja.singh@gmail.com\", \"refund_amount\": 25.0, \"currency\": \"USD\"}",
+      "raw_first_attempt": "{\n  \"name\": \"Pooja S.\",\n  \"email\": \"pooja.singh@gmail.com\",\n  \"refund_amount\": 25.0,\n  \"currency\": \"USD\"\n}",
+      "raw_second_attempt": null
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC13",
+      "category": "written_amount",
+      "description": "Amount written in words",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"Dev Patel\", \"email\": \"dev.patel@gmail.com\", \"refund_amount\": null, \"currency\": \"INR\"}",
+      "predicted": "{\"name\": \"Dev Patel\", \"email\": \"dev.patel@gmail.com\", \"refund_amount\": null, \"currency\": \"INR\"}",
+      "raw_first_attempt": "{\n  \"name\": \"Dev Patel\",\n  \"email\": \"dev.patel@gmail.com\",\n  \"refund_amount\": null,\n  \"currency\": \"INR\"\n}",
+      "raw_second_attempt": null
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC14",
+      "category": "currency_symbol_only",
+      "description": "Currency symbol with comma formatting",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"Sarah Joseph\", \"email\": \"sarahjoseph@gmail.com\", \"refund_amount\": 1299.0, \"currency\": \"INR\"}",
+      "predicted": "{\"name\": \"Sarah Joseph\", \"email\": \"sarahjoseph@gmail.com\", \"refund_amount\": 1299.0, \"currency\": \"INR\"}",
+      "raw_first_attempt": "{\n  \"name\": \"Sarah Joseph\",\n  \"email\": \"sarahjoseph@gmail.com\",\n  \"refund_amount\": 1299,\n  \"currency\": \"INR\"\n}",
+      "raw_second_attempt": null
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC15",
+      "category": "two_customers",
+      "description": "Two people mentioned",
+      "status": "pass_after_retry",
+      "attempt_count": 2,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"Vivek Rao\", \"email\": \"vivek.rao@gmail.com\", \"refund_amount\": 60.0, \"currency\": \"USD\"}",
+      "predicted": "{\"name\": \"Vivek Rao\", \"email\": \"vivek.rao@gmail.com\", \"refund_amount\": 60.0, \"currency\": \"USD\"}",
+      "raw_first_attempt": "{\n  \"name\": null,\n  \"email\": \"vivek.rao@gmail.com\",\n  \"refund_amount\": 60.0,\n  \"currency\": \"USD\"\n}",
+      "raw_second_attempt": "```json\n{\n  \"name\": \"Vivek Rao\",\n  \"email\": \"vivek.rao@gmail.com\",\n  \"refund_amount\": 60.0,\n  \"currency\": \"USD\"\n}\n```"
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC16",
+      "category": "quoted_reply",
+      "description": "Quoted thread noise",
+      "status": "fail_content",
+      "attempt_count": 2,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "wrong_name|wrong_email|wrong_refund_amount",
+      "expected": "{\"name\": \"Aditi Menon\", \"email\": \"aditi.menon@outlook.com\", \"refund_amount\": 14.99, \"currency\": \"USD\"}",
+      "predicted": "{\"name\": \"Rahul\", \"email\": \"rahul@gmail.com\", \"refund_amount\": 70.0, \"currency\": \"USD\"}",
+      "raw_first_attempt": "{\n  \"name\": null,\n  \"email\": \"rahul@gmail.com\",\n  \"refund_amount\": 70.0,\n  \"currency\": \"USD\"\n}",
+      "raw_second_attempt": "```json\n{\n  \"name\": \"Rahul\",\n  \"email\": \"rahul@gmail.com\",\n  \"refund_amount\": 70.0,\n  \"currency\": \"USD\"\n}\n```"
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC17",
+      "category": "invalid_email_text",
+      "description": "Email described in words, should likely be null",
+      "status": "fail_content",
+      "attempt_count": 2,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "hallucinated_email",
+      "expected": "{\"name\": \"Karan\", \"email\": null, \"refund_amount\": 9.99, \"currency\": \"USD\"}",
+      "predicted": "{\"name\": \"Karan\", \"email\": \"karan@gmail.com\", \"refund_amount\": 9.99, \"currency\": \"USD\"}",
+      "raw_first_attempt": "{\n  \"name\": \"Karan\",\n  \"email\": \"karan@gmail.com\",\n  \"refund_amount\": 9.99,\n  \"currency\": \"USD\"\n}",
+      "raw_second_attempt": "{\n  \"name\": \"Karan\",\n  \"email\": \"karan@gmail.com\",\n  \"refund_amount\": 9.99,\n  \"currency\": \"USD\"\n}"
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC18",
+      "category": "special_name_chars",
+      "description": "Name with apostrophe",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"Anne O'Connor\", \"email\": \"anne.oconnor@gmail.com\", \"refund_amount\": 11.25, \"currency\": \"GBP\"}",
+      "predicted": "{\"name\": \"Anne O'Connor\", \"email\": \"anne.oconnor@gmail.com\", \"refund_amount\": 11.25, \"currency\": \"GBP\"}",
+      "raw_first_attempt": "{\n  \"name\": \"Anne O'Connor\",\n  \"email\": \"anne.oconnor@gmail.com\",\n  \"refund_amount\": 11.25,\n  \"currency\": \"GBP\"\n}",
+      "raw_second_attempt": null
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC19",
+      "category": "extra_json_bait",
+      "description": "Ticket contains fake JSON text",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"Leela Varma\", \"email\": \"leela.varma@gmail.com\", \"refund_amount\": 19.0, \"currency\": \"USD\"}",
+      "predicted": "{\"name\": \"Leela Varma\", \"email\": \"leela.varma@gmail.com\", \"refund_amount\": 19.0, \"currency\": \"USD\"}",
+      "raw_first_attempt": "{\n  \"name\": \"Leela Varma\",\n  \"email\": \"leela.varma@gmail.com\",\n  \"refund_amount\": 19.0,\n  \"currency\": \"USD\"\n}",
+      "raw_second_attempt": null
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC20",
+      "category": "irrelevant_refund_word",
+      "description": "Contains word refund but not a user request",
+      "status": "fail_content",
+      "attempt_count": 2,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "hallucinated_refund_amount|hallucinated_currency",
+      "expected": "{\"name\": null, \"email\": null, \"refund_amount\": null, \"currency\": null}",
+      "predicted": "{\"name\": null, \"email\": null, \"refund_amount\": 500.0, \"currency\": \"USD\"}",
+      "raw_first_attempt": "{\n  \"name\": null,\n  \"email\": \"accounts@shop.com\",\n  \"refund_amount\": 500.0,\n  \"currency\": \"USD\"\n}",
+      "raw_second_attempt": "```json\n{\n  \"name\": null,\n  \"email\": null,\n  \"refund_amount\": 500.0,\n  \"currency\": \"USD\"\n}\n```"
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC21",
+      "category": "multiple_currencies",
+      "description": "Local and card currency both shown",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"Neeraj S\", \"email\": \"neerajs@gmail.com\", \"refund_amount\": 820.0, \"currency\": \"INR\"}",
+      "predicted": "{\"name\": \"Neeraj S\", \"email\": \"neerajs@gmail.com\", \"refund_amount\": 820.0, \"currency\": \"INR\"}",
+      "raw_first_attempt": "{\n  \"name\": \"Neeraj S\",\n  \"email\": \"neerajs@gmail.com\",\n  \"refund_amount\": 820,\n  \"currency\": \"INR\"\n}",
+      "raw_second_attempt": null
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC22",
+      "category": "null_expected",
+      "description": "No structured fields are actually recoverable",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": null, \"email\": null, \"refund_amount\": null, \"currency\": null}",
+      "predicted": "{\"name\": null, \"email\": null, \"refund_amount\": null, \"currency\": null}",
+      "raw_first_attempt": "{\n  \"name\": null,\n  \"email\": null,\n  \"refund_amount\": null,\n  \"currency\": null\n}",
+      "raw_second_attempt": null
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC23",
+      "category": "decimal_precision",
+      "description": "Three decimal noise",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"John Paul\", \"email\": \"john.paul@gmail.com\", \"refund_amount\": 10.0, \"currency\": \"USD\"}",
+      "predicted": "{\"name\": \"John Paul\", \"email\": \"john.paul@gmail.com\", \"refund_amount\": 10.0, \"currency\": \"USD\"}",
+      "raw_first_attempt": "{\n  \"name\": \"John Paul\",\n  \"email\": \"john.paul@gmail.com\",\n  \"refund_amount\": 10.0,\n  \"currency\": \"USD\"\n}",
+      "raw_second_attempt": null
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "test_id": "TC24",
+      "category": "markdown_noise",
+      "description": "Ticket content includes markdown bullets and labels",
+      "status": "pass",
+      "attempt_count": 1,
+      "first_attempt_parse_error": null,
+      "second_attempt_parse_error": null,
+      "error_tags": "",
+      "expected": "{\"name\": \"Bhavna R\", \"email\": \"bhavna.r@gmail.com\", \"refund_amount\": 7.49, \"currency\": \"USD\"}",
+      "predicted": "{\"name\": \"Bhavna R\", \"email\": \"bhavna.r@gmail.com\", \"refund_amount\": 7.49, \"currency\": \"USD\"}",
+      "raw_first_attempt": "{\n  \"name\": \"Bhavna R\",\n  \"email\": \"bhavna.r@gmail.com\",\n  \"refund_amount\": 7.49,\n  \"currency\": \"USD\"\n}",
+      "raw_second_attempt": null
+    }
+  ]
+}

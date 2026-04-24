@@ -1,0 +1,186 @@
+model,test_id,category,description,status,attempt_count,first_attempt_parse_error,second_attempt_parse_error,error_tags,expected,predicted,raw_first_attempt,raw_second_attempt
+qwen2.5:1.5b,TC01,happy_path,Clean single refund request,pass,1,,,,"{""name"": ""Priya Sharma"", ""email"": ""priya.sharma@gmail.com"", ""refund_amount"": 24.99, ""currency"": ""USD""}","{""name"": ""Priya Sharma"", ""email"": ""priya.sharma@gmail.com"", ""refund_amount"": 24.99, ""currency"": ""USD""}","{
+  ""name"": ""Priya Sharma"",
+  ""email"": ""priya.sharma@gmail.com"",
+  ""refund_amount"": 24.99,
+  ""currency"": ""USD""
+}",
+qwen2.5:1.5b,TC02,missing_email,Missing email,fail_content,2,,,hallucinated_email,"{""name"": ""Ramesh Kumar"", ""email"": null, ""refund_amount"": 499.0, ""currency"": ""INR""}","{""name"": ""Ramesh Kumar"", ""email"": ""ramesh.kumar@example.com"", ""refund_amount"": 499.0, ""currency"": ""INR""}","{
+  ""name"": ""Ramesh Kumar"",
+  ""email"": ""ramesh.kumar@gmail.com"",
+  ""refund_amount"": null,
+  ""currency"": ""INR""
+}","{
+  ""name"": ""Ramesh Kumar"",
+  ""email"": ""ramesh.kumar@example.com"",
+  ""refund_amount"": 499,
+  ""currency"": ""INR""
+}"
+qwen2.5:1.5b,TC03,missing_name,Missing name but email present,pass,1,,,,"{""name"": null, ""email"": ""user_88@yahoo.com"", ""refund_amount"": 15.5, ""currency"": ""USD""}","{""name"": null, ""email"": ""user_88@yahoo.com"", ""refund_amount"": 15.5, ""currency"": ""USD""}","{
+  ""name"": null,
+  ""email"": ""user_88@yahoo.com"",
+  ""refund_amount"": 15.50,
+  ""currency"": ""USD""
+}",
+qwen2.5:1.5b,TC04,missing_amount,Amount absent,pass_after_retry,2,,,,"{""name"": ""Kavya Rao"", ""email"": ""kavya.rao@outlook.com"", ""refund_amount"": null, ""currency"": null}","{""name"": ""Kavya Rao"", ""email"": ""kavya.rao@outlook.com"", ""refund_amount"": null, ""currency"": null}","{
+  ""name"": ""Kavya Rao"",
+  ""email"": ""kavya.rao@outlook.com"",
+  ""refund_amount"": null,
+  ""currency"": ""INR""
+}","{
+  ""name"": ""Kavya Rao"",
+  ""email"": ""kavya.rao@outlook.com"",
+  ""refund_amount"": null,
+  ""currency"": null
+}"
+qwen2.5:1.5b,TC05,multiple_amounts,Old amount and requested amount both present,pass,1,,,,"{""name"": ""Arjun Mehta"", ""email"": ""arjun.m@proton.me"", ""refund_amount"": 20.0, ""currency"": ""USD""}","{""name"": ""Arjun Mehta"", ""email"": ""arjun.m@proton.me"", ""refund_amount"": 20.0, ""currency"": ""USD""}","{
+  ""name"": ""Arjun Mehta"",
+  ""email"": ""arjun.m@proton.me"",
+  ""refund_amount"": 20,
+  ""currency"": ""USD""
+}",
+qwen2.5:1.5b,TC06,multiple_emails,Requester email and support email both present,pass,1,,,,"{""name"": ""Nisha Verma"", ""email"": ""customer.nisha@gmail.com"", ""refund_amount"": 899.0, ""currency"": ""INR""}","{""name"": ""Nisha Verma"", ""email"": ""customer.nisha@gmail.com"", ""refund_amount"": 899.0, ""currency"": ""INR""}","{
+  ""name"": ""Nisha Verma"",
+  ""email"": ""customer.nisha@gmail.com"",
+  ""refund_amount"": 899,
+  ""currency"": ""INR""
+}",
+qwen2.5:1.5b,TC07,forwarded_chain,Latest message should win over old quoted content,pass,1,,,,"{""name"": ""Sneha Iyer"", ""email"": ""sneha.iyer@gmail.com"", ""refund_amount"": 45.0, ""currency"": ""USD""}","{""name"": ""Sneha Iyer"", ""email"": ""sneha.iyer@gmail.com"", ""refund_amount"": 45.0, ""currency"": ""USD""}","{
+  ""name"": ""Sneha Iyer"",
+  ""email"": ""sneha.iyer@gmail.com"",
+  ""refund_amount"": 45.0,
+  ""currency"": ""USD""
+}",
+qwen2.5:1.5b,TC08,signature_noise,Agent signature should not be extracted,pass,1,,,,"{""name"": ""Mohan Babu"", ""email"": ""mohanbabu@icloud.com"", ""refund_amount"": 32.0, ""currency"": ""EUR""}","{""name"": ""Mohan Babu"", ""email"": ""mohanbabu@icloud.com"", ""refund_amount"": 32.0, ""currency"": ""EUR""}","{
+  ""name"": ""Mohan Babu"",
+  ""email"": ""mohanbabu@icloud.com"",
+  ""refund_amount"": 32.0,
+  ""currency"": ""EUR""
+}",
+qwen2.5:1.5b,TC09,negation,Do not pick denied refund as successful amount unless extracting requested/refund amount from context,fail_content,2,,,missed_currency,"{""name"": ""Harish"", ""email"": ""harish123@gmail.com"", ""refund_amount"": 40.0, ""currency"": ""USD""}","{""name"": ""Harish"", ""email"": ""harish123@gmail.com"", ""refund_amount"": 40.0, ""currency"": null}","{
+  ""name"": ""Harish"",
+  ""email"": ""harish123@gmail.com"",
+  ""refund_amount"": 40,
+  ""currency"": null
+}","{
+  ""name"": ""Harish"",
+  ""email"": ""harish123@gmail.com"",
+  ""refund_amount"": 40.0,
+  ""currency"": null
+}"
+qwen2.5:1.5b,TC10,refund_denied,Refund denied but amount mentioned,pass,1,,,,"{""name"": ""Meera Nair"", ""email"": ""meera.nair@gmail.com"", ""refund_amount"": 18.0, ""currency"": ""USD""}","{""name"": ""Meera Nair"", ""email"": ""meera.nair@gmail.com"", ""refund_amount"": 18.0, ""currency"": ""USD""}","{
+  ""name"": ""Meera Nair"",
+  ""email"": ""meera.nair@gmail.com"",
+  ""refund_amount"": 18.0,
+  ""currency"": ""USD""
+}",
+qwen2.5:1.5b,TC11,multilingual,English plus Hindi/Indian language context,pass,1,,,,"{""name"": ""Rohit Gupta"", ""email"": ""roh_it@rediffmail.com"", ""refund_amount"": 250.0, ""currency"": ""INR""}","{""name"": ""Rohit Gupta"", ""email"": ""roh_it@rediffmail.com"", ""refund_amount"": 250.0, ""currency"": ""INR""}","{
+  ""name"": ""Rohit Gupta"",
+  ""email"": ""roh_it@rediffmail.com"",
+  ""refund_amount"": 250,
+  ""currency"": ""INR""
+}",
+qwen2.5:1.5b,TC12,ocr_noise,Broken spacing and OCR noise,pass,1,,,,"{""name"": ""Pooja S."", ""email"": ""pooja.singh@gmail.com"", ""refund_amount"": 25.0, ""currency"": ""USD""}","{""name"": ""Pooja S."", ""email"": ""pooja.singh@gmail.com"", ""refund_amount"": 25.0, ""currency"": ""USD""}","{
+  ""name"": ""Pooja S."",
+  ""email"": ""pooja.singh@gmail.com"",
+  ""refund_amount"": 25.0,
+  ""currency"": ""USD""
+}",
+qwen2.5:1.5b,TC13,written_amount,Amount written in words,pass,1,,,,"{""name"": ""Dev Patel"", ""email"": ""dev.patel@gmail.com"", ""refund_amount"": null, ""currency"": ""INR""}","{""name"": ""Dev Patel"", ""email"": ""dev.patel@gmail.com"", ""refund_amount"": null, ""currency"": ""INR""}","{
+  ""name"": ""Dev Patel"",
+  ""email"": ""dev.patel@gmail.com"",
+  ""refund_amount"": null,
+  ""currency"": ""INR""
+}",
+qwen2.5:1.5b,TC14,currency_symbol_only,Currency symbol with comma formatting,pass,1,,,,"{""name"": ""Sarah Joseph"", ""email"": ""sarahjoseph@gmail.com"", ""refund_amount"": 1299.0, ""currency"": ""INR""}","{""name"": ""Sarah Joseph"", ""email"": ""sarahjoseph@gmail.com"", ""refund_amount"": 1299.0, ""currency"": ""INR""}","{
+  ""name"": ""Sarah Joseph"",
+  ""email"": ""sarahjoseph@gmail.com"",
+  ""refund_amount"": 1299,
+  ""currency"": ""INR""
+}",
+qwen2.5:1.5b,TC15,two_customers,Two people mentioned,pass_after_retry,2,,,,"{""name"": ""Vivek Rao"", ""email"": ""vivek.rao@gmail.com"", ""refund_amount"": 60.0, ""currency"": ""USD""}","{""name"": ""Vivek Rao"", ""email"": ""vivek.rao@gmail.com"", ""refund_amount"": 60.0, ""currency"": ""USD""}","{
+  ""name"": null,
+  ""email"": ""vivek.rao@gmail.com"",
+  ""refund_amount"": 60.0,
+  ""currency"": ""USD""
+}","```json
+{
+  ""name"": ""Vivek Rao"",
+  ""email"": ""vivek.rao@gmail.com"",
+  ""refund_amount"": 60.0,
+  ""currency"": ""USD""
+}
+```"
+qwen2.5:1.5b,TC16,quoted_reply,Quoted thread noise,fail_content,2,,,wrong_name|wrong_email|wrong_refund_amount,"{""name"": ""Aditi Menon"", ""email"": ""aditi.menon@outlook.com"", ""refund_amount"": 14.99, ""currency"": ""USD""}","{""name"": ""Rahul"", ""email"": ""rahul@gmail.com"", ""refund_amount"": 70.0, ""currency"": ""USD""}","{
+  ""name"": null,
+  ""email"": ""rahul@gmail.com"",
+  ""refund_amount"": 70.0,
+  ""currency"": ""USD""
+}","```json
+{
+  ""name"": ""Rahul"",
+  ""email"": ""rahul@gmail.com"",
+  ""refund_amount"": 70.0,
+  ""currency"": ""USD""
+}
+```"
+qwen2.5:1.5b,TC17,invalid_email_text,"Email described in words, should likely be null",fail_content,2,,,hallucinated_email,"{""name"": ""Karan"", ""email"": null, ""refund_amount"": 9.99, ""currency"": ""USD""}","{""name"": ""Karan"", ""email"": ""karan@gmail.com"", ""refund_amount"": 9.99, ""currency"": ""USD""}","{
+  ""name"": ""Karan"",
+  ""email"": ""karan@gmail.com"",
+  ""refund_amount"": 9.99,
+  ""currency"": ""USD""
+}","{
+  ""name"": ""Karan"",
+  ""email"": ""karan@gmail.com"",
+  ""refund_amount"": 9.99,
+  ""currency"": ""USD""
+}"
+qwen2.5:1.5b,TC18,special_name_chars,Name with apostrophe,pass,1,,,,"{""name"": ""Anne O'Connor"", ""email"": ""anne.oconnor@gmail.com"", ""refund_amount"": 11.25, ""currency"": ""GBP""}","{""name"": ""Anne O'Connor"", ""email"": ""anne.oconnor@gmail.com"", ""refund_amount"": 11.25, ""currency"": ""GBP""}","{
+  ""name"": ""Anne O'Connor"",
+  ""email"": ""anne.oconnor@gmail.com"",
+  ""refund_amount"": 11.25,
+  ""currency"": ""GBP""
+}",
+qwen2.5:1.5b,TC19,extra_json_bait,Ticket contains fake JSON text,pass,1,,,,"{""name"": ""Leela Varma"", ""email"": ""leela.varma@gmail.com"", ""refund_amount"": 19.0, ""currency"": ""USD""}","{""name"": ""Leela Varma"", ""email"": ""leela.varma@gmail.com"", ""refund_amount"": 19.0, ""currency"": ""USD""}","{
+  ""name"": ""Leela Varma"",
+  ""email"": ""leela.varma@gmail.com"",
+  ""refund_amount"": 19.0,
+  ""currency"": ""USD""
+}",
+qwen2.5:1.5b,TC20,irrelevant_refund_word,Contains word refund but not a user request,fail_content,2,,,hallucinated_refund_amount|hallucinated_currency,"{""name"": null, ""email"": null, ""refund_amount"": null, ""currency"": null}","{""name"": null, ""email"": null, ""refund_amount"": 500.0, ""currency"": ""USD""}","{
+  ""name"": null,
+  ""email"": ""accounts@shop.com"",
+  ""refund_amount"": 500.0,
+  ""currency"": ""USD""
+}","```json
+{
+  ""name"": null,
+  ""email"": null,
+  ""refund_amount"": 500.0,
+  ""currency"": ""USD""
+}
+```"
+qwen2.5:1.5b,TC21,multiple_currencies,Local and card currency both shown,pass,1,,,,"{""name"": ""Neeraj S"", ""email"": ""neerajs@gmail.com"", ""refund_amount"": 820.0, ""currency"": ""INR""}","{""name"": ""Neeraj S"", ""email"": ""neerajs@gmail.com"", ""refund_amount"": 820.0, ""currency"": ""INR""}","{
+  ""name"": ""Neeraj S"",
+  ""email"": ""neerajs@gmail.com"",
+  ""refund_amount"": 820,
+  ""currency"": ""INR""
+}",
+qwen2.5:1.5b,TC22,null_expected,No structured fields are actually recoverable,pass,1,,,,"{""name"": null, ""email"": null, ""refund_amount"": null, ""currency"": null}","{""name"": null, ""email"": null, ""refund_amount"": null, ""currency"": null}","{
+  ""name"": null,
+  ""email"": null,
+  ""refund_amount"": null,
+  ""currency"": null
+}",
+qwen2.5:1.5b,TC23,decimal_precision,Three decimal noise,pass,1,,,,"{""name"": ""John Paul"", ""email"": ""john.paul@gmail.com"", ""refund_amount"": 10.0, ""currency"": ""USD""}","{""name"": ""John Paul"", ""email"": ""john.paul@gmail.com"", ""refund_amount"": 10.0, ""currency"": ""USD""}","{
+  ""name"": ""John Paul"",
+  ""email"": ""john.paul@gmail.com"",
+  ""refund_amount"": 10.0,
+  ""currency"": ""USD""
+}",
+qwen2.5:1.5b,TC24,markdown_noise,Ticket content includes markdown bullets and labels,pass,1,,,,"{""name"": ""Bhavna R"", ""email"": ""bhavna.r@gmail.com"", ""refund_amount"": 7.49, ""currency"": ""USD""}","{""name"": ""Bhavna R"", ""email"": ""bhavna.r@gmail.com"", ""refund_amount"": 7.49, ""currency"": ""USD""}","{
+  ""name"": ""Bhavna R"",
+  ""email"": ""bhavna.r@gmail.com"",
+  ""refund_amount"": 7.49,
+  ""currency"": ""USD""
+}",

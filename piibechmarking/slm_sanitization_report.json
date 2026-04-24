@@ -1,0 +1,150 @@
+{
+    "llama3.2:1b": [
+        {
+            "prompt_id": 1,
+            "tps": 20.05,
+            "latency_s": 8.88,
+            "schema_valid": true,
+            "data_accurate": true,
+            "extracted": {
+                "customer_name": "John Doe",
+                "email_address": "j.doe99@gmail.com",
+                "credit_card_last_four": "4092",
+                "claim_amount": 45.5
+            }
+        },
+        {
+            "prompt_id": 2,
+            "tps": 21.23,
+            "latency_s": 4.12,
+            "schema_valid": true,
+            "data_accurate": true,
+            "extracted": {
+                "customer_name": "Sarah Smith",
+                "email_address": "sarah.smith@company.org",
+                "credit_card_last_four": "0000",
+                "claim_amount": 120.0
+            }
+        },
+        {
+            "prompt_id": 3,
+            "tps": 21.63,
+            "latency_s": 3.32,
+            "schema_valid": true,
+            "data_accurate": false,
+            "extracted": {
+                "customer_name": "Unknown",
+                "email_address": "",
+                "credit_card_last_four": "0000",
+                "claim_amount": 15.99
+            }
+        }
+    ],
+    "qwen2.5:1.5b": [
+        {
+            "prompt_id": 1,
+            "tps": 22.15,
+            "latency_s": 8.95,
+            "schema_valid": true,
+            "data_accurate": true,
+            "extracted": {
+                "customer_name": "John Doe",
+                "email_address": "j.doe99@gmail.com",
+                "credit_card_last_four": "4092",
+                "claim_amount": 45.5
+            }
+        },
+        {
+            "prompt_id": 2,
+            "tps": 20.04,
+            "latency_s": 5.9,
+            "schema_valid": true,
+            "data_accurate": false,
+            "extracted": {
+                "customer_name": "Sarah Smith",
+                "email_address": "sarah.smith@company.org",
+                "credit_card_last_four": "1128",
+                "claim_amount": 0.0
+            }
+        },
+        {
+            "prompt_id": 3,
+            "tps": 21.28,
+            "latency_s": 3.63,
+            "schema_valid": true,
+            "data_accurate": false,
+            "extracted": {
+                "customer_name": null,
+                "email_address": null,
+                "credit_card_last_four": null,
+                "claim_amount": 0.0
+            }
+        }
+    ],
+    "deepseek-r1:1.5b": [
+        {
+            "prompt_id": 1,
+            "tps": 18.1,
+            "latency_s": 45.88,
+            "schema_valid": true,
+            "data_accurate": true,
+            "extracted": {
+                "customer_name": "John Doe",
+                "email_address": "j.doe99@gmail.com",
+                "credit_card_last_four": "4092",
+                "claim_amount": 45.5
+            }
+        },
+        {
+            "prompt_id": 2,
+            "tps": 17.83,
+            "latency_s": 27.24,
+            "schema_valid": true,
+            "data_accurate": true,
+            "extracted": {
+                "customer_name": "Sarah Smith",
+                "email_address": "sarah.smith@company.org",
+                "credit_card_last_four": "None",
+                "claim_amount": 120.0
+            }
+        },
+        {
+            "prompt_id": 3,
+            "schema_valid": false,
+            "error": "1 validation error for ExtractedPII\nclaim_amount\n  Field required [type=missing, input_value={'customer_name': 'None',...card_last_four': 'None'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing"
+        }
+    ],
+    "smollm2:1.7b": [
+        {
+            "prompt_id": 1,
+            "tps": 12.0,
+            "latency_s": 13.57,
+            "schema_valid": true,
+            "data_accurate": true,
+            "extracted": {
+                "customer_name": "John Doe",
+                "email_address": "j.doe99@gmail.com",
+                "credit_card_last_four": "4092",
+                "claim_amount": 45.5
+            }
+        },
+        {
+            "prompt_id": 2,
+            "tps": 12.3,
+            "latency_s": 7.17,
+            "schema_valid": true,
+            "data_accurate": false,
+            "extracted": {
+                "customer_name": "Sarah Smith",
+                "email_address": "sarah.smith@company.org",
+                "credit_card_last_four": "128",
+                "claim_amount": 0.0
+            }
+        },
+        {
+            "prompt_id": 3,
+            "schema_valid": false,
+            "error": "1 validation error for ExtractedPII\ncredit_card_last_four\n  Input should be a valid string [type=string_type, input_value=0.0, input_type=float]\n    For further information visit https://errors.pydantic.dev/2.12/v/string_type"
+        }
+    ]
+}
