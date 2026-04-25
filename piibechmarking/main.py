@@ -4,9 +4,7 @@ import json
 
 # Updated target models optimized for edge-device constraints
 target_models = [
-    "llama3.2:1b",
-    "qwen2.5:1.5b",      
-    "gemma3:1b"       
+    "llama3.2:3b"
 ]
 
 # Base test prompts (No strict JSON enforcement, basic extraction prompts)
