@@ -15,7 +15,7 @@ Built to run locally for better privacy, lower cost, and reduced latency.
 
 ## Documentation
 
- Full Engineering Report (PDF): 
+ Full Engineering Report (PDF): https://github.com/Sivasindhuja/Local_Inference_Benchmarking/blob/main/docs/Technical_Documentation.pdf
 
 ---
 
