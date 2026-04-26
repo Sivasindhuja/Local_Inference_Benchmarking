@@ -156,13 +156,23 @@ async def process_ticket(req: TicketRequest):
     
     # 2. Heuristic Routing Trigger
     needs_fallback = False
+    ticket_lower = req.ticket_text.lower()
+    
     if data is None:
-        # Schema validation failed completely even after reprompt
+        # Schema validation failed completely
         needs_fallback = True
     elif data.get("email") is None and data.get("refund_amount") is None:
-        # Logic validation: The model output valid JSON, but failed to find core business data
+        # Failed to find core business data
         needs_fallback = True
-
+    elif data.get("name") is None and data.get("email") is not None:
+        # Suspicious: Found an email but missed the name. 1.5B often fails this.
+        needs_fallback = True
+    elif data.get("refund_amount") is not None and data.get("currency") is None:
+        # Suspicious: Found a number but missed the currency.
+        needs_fallback = True
+    elif ">" in req.ticket_text or "forwarded" in ticket_lower or "---" in req.ticket_text:
+        # Known limitation: 1.5B models fail temporal context and quoted replies.
+        needs_fallback = True
     # 3. Fallback Cascade (Includes its own internal reprompt loop)
     if needs_fallback:
         print(f"[Router] {PRIMARY_MODEL} failed or returned empty data. Escalating to {FALLBACK_MODEL}...")
