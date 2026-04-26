@@ -1,83 +1,204 @@
+# PII Extraction from Refund Tickets
 
+An offline API system that extracts structured Personally Identifiable Information (PII) and refund details from unstructured customer support tickets using local Small Language Models (SLMs).
 
----
+The system converts messy refund messages into clean JSON containing:
 
-# SLM-Benchmarking v1.0: Local Inference & Reliability Framework
+* Customer Name
+* Email Address
+* Refund Amount
+* Currency
 
-**Live Dashboard:** [https://sivasindhuja.github.io/Local_Inference_Benchmarking/]
-
-This repository contains a comprehensive benchmarking suite and research study on the practicalities of running **Small Language Models (SLMs)** on consumer-grade integrated graphics. Moving beyond simple chat interfaces, this project implements a **Reliability Layer** using Pydantic to ensure local models are production-ready for automated software pipelines.
-
----
-
-##  System Architecture
-* **Hardware:** Intel(R) Iris(R) Xe Graphics (iGPU) | 16GB LPDDR4x RAM (8GB Shared VRAM).
-* **Inference Engine:** [Ollama](https://ollama.com/) v0.5+.
-* **Validation Layer:** Pydantic v2.x.
-* **Language:** Python 3.11.
+Built to run locally for better privacy, lower cost, and reduced latency.
 
 ---
 
-##  Key Features
+## Documentation
 
-### 1. Multi-Model Performance Analytics
-We benchmarked **Llama 3.2 (3B)**, **Phi-4 Mini (3.8B)**, and **Mistral 7B (v0.3)** across three critical KPIs:
-* **Tokens Per Second (TPS):** Raw generation throughput.
-* **Time to First Token (TTFT):** Initial response latency (snappiness).
-* **Total Response Latency:** End-to-end execution time for complex tasks.
-
-### 2. The Pydantic Reliability Loop
-Small models often struggle with instruction following. We implemented a **Defensive Programming** wrapper that:
-* Enforces a strict JSON schema.
-* Validates outputs using Pydantic models.
-* **Self-Correction:** Automatically re-prompts the model once with specific error feedback if a schema is violated.
-* Fails gracefully with standardized null-objects to prevent system crashes.
-
-### 3. Stochasticity Control
-A study on how **Temperature ($T$)** affects reliability. We documented why $T=0$ (Greedy Decoding) is mandatory for structured data tasks, as $T=0.7$ led to a significant increase in schema hallucinations.
+ Full Engineering Report (PDF): 
 
 ---
 
-##  Benchmarking Results (Warm Start)
+## Why This Project?
 
-| Model | TPS | TTFT | JSON Adherence (Few-Shot) |
-| :--- | :--- | :--- | :--- |
-| **Llama 3.2 (3B)** | **13.52** | 284.35 ms | **100%** |
-| **Phi-4 Mini (3.8B)** | 7.42 | 255.10 ms | **100%** |
-| **Mistral 7B (v0.3)** | 7.71 | **204.29 ms** | 86% |
+Customer support refund tickets often contain important information hidden inside free-text messages, forwarded emails, signatures, and noisy content.
 
----
+Manual review is slow and error-prone.
 
-##  Engineering Challenges & Lessons Learned
-
-### **The "Cold Start" Penalty**
-Phi-4 Mini exhibited a **62-second load time** on the Intel iGPU. We solved this by implementing a **Warm-up Pulse** to ensure model weights are resident in Shared VRAM before benchmarking begins.
-
-### **Zero-Shot Incompetence**
-Llama 3.2 scored **0% success** on JSON tasks zero-shot. We developed a **Few-Shot System Prompting** strategy that provided a structural anchor, resulting in a jump to **100% success**.
-
-### **Memory Fragmentation (Status 500)**
-Running 7B models on 8GB Shared VRAM frequently caused runner termination. We implemented a **"Clean Slate" Protocol** to manage background RAM usage and deallocate GPU memory between runs.
+This project automates extraction of refund-related fields from raw tickets using local language models with validation and fallback routing.
 
 ---
 
-## Repository Structure
-* `inferencePerformance.py`: Measures TPS, TTFT, and Latency.
-* `structured_output.py`: The Pydantic validation and retry logic implementation.
-* `test_prompts.py`: The standardized 30-prompt evaluation suite.
-* `temperature.py`: Script for measuring output variance.
-* `index.html`: The source code for the [Live Dashboard].
+## Key Features
+
+* Offline local inference using Ollama Ollama
+* REST API built with FastAPI FastAPI
+* Structured JSON output
+* Schema validation using Pydantic Pydantic
+* Retry logic for invalid JSON responses
+* Fallback routing for difficult edge cases
+* Benchmark-driven model selection
+* Privacy-friendly local processing
 
 ---
 
-##  How to Run
-1.  Install [Ollama](https://ollama.com/).
-2.  Clone this repo.
-3.  Install dependencies: `pip install pydantic ollama`.
-4.  Run the benchmark: `python test_prompts.py`.
+## Models Evaluated
+
+* Meta Llama 3.2 (1B / 3B)
+* Alibaba Cloud Qwen 2.5 (1.5B)
+* Google Gemma 3 (1B)
+* DeepSeek DeepSeek-R1
+
+Final primary model selected: **Qwen 2.5 (1.5B)**
 
 ---
 
-**Author:** Siva Sindhuja Tsundupalli  
+## Accuracy Improvement Journey
+
+| Stage                  | Accuracy   |
+| ---------------------- | ---------- |
+| Baseline Qwen 2.5      | 58.30%     |
+| Currency Prompt Fix    | 70.80%     |
+| Few-shot Prompting     | 79.17%     |
+| API Cascade + Fallback | **83.30%** |
 
 ---
+
+## Architecture
+
+```text id="ybk3kv"
+Incoming Refund Ticket
+        ↓
+Primary Model (Qwen 2.5)
+        ↓
+Schema Validation
+        ↓
+If Invalid → Retry
+If Complex / Low Confidence → Fallback Model (Llama 3.2 3B)
+        ↓
+Final Structured JSON Output
+```
+
+---
+
+## Example Input
+
+```text id="2hlbaj"
+Hi team, this is Priya Sharma.
+My email is priya.sharma@gmail.com.
+Please refund $24.99 for duplicate charge.
+```
+
+## Example Output
+
+```json id="it7v8k"
+{
+  "name": "Priya Sharma",
+  "email": "priya.sharma@gmail.com",
+  "refund_amount": 24.99,
+  "currency": "USD"
+}
+```
+
+---
+
+## How to Run This Project
+
+### 1. Clone the Repository
+
+```bash id="5q5c13"
+git clone <your-repo-url>
+cd <repo-folder>
+```
+
+### 2. Install Python Dependencies
+
+```bash id="vxw5q1"
+pip install -r requirements.txt
+```
+
+### 3. Install and Start Ollama
+
+Download Ollama, then pull required models:
+
+```bash id="86o1lc"
+ollama pull qwen2.5:1.5b
+ollama pull llama3.2:3b
+```
+
+### 4. Start the API Server
+
+```bash id="fd0u0y"
+uvicorn app:app --reload
+```
+
+### 5. Test the API
+
+```bash id="3fthq2"
+python test_api.py
+```
+
+---
+
+## Benchmark Dataset
+
+Custom 24-case evaluation suite covering:
+
+* Missing fields
+* Multiple conflicting values
+* Forwarded email chains
+* Quoted replies
+* Signature noise
+* Negation / denied refunds
+* OCR corrupted text
+* Multilingual text
+* Currency symbols
+* Fake embedded JSON
+
+---
+
+## Tech Stack
+
+* Python
+* FastAPI FastAPI
+* Pydantic Pydantic
+* Ollama Ollama
+* Local LLMs
+* JSON APIs
+
+---
+
+## Remaining Challenges
+
+* Obfuscated emails (`name at gmail dot com`)
+* Deep nested email threads
+* Multiple customers in one ticket
+* False extraction from visible tokens
+* Ambiguous business context
+
+---
+
+## Future Improvements
+
+* Human review queue
+* Regex + LLM hybrid extraction
+* Confidence scoring
+* Fine-tuned domain model
+* PostgreSQL Global Development Group PostgreSQL logging & monitoring
+
+---
+
+## What This Project Demonstrates
+
+* Practical LLM system design
+* Prompt engineering
+* Multi-model routing
+* Validation pipelines
+* Offline AI deployment
+* Benchmark-driven engineering
+
+---
+
+## Author
+
+Built as an applied AI engineering project focused on real-world document understanding and local model deployment.

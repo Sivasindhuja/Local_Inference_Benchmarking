@@ -1,2 +1,0 @@
-model,total,pass_first_try,pass_after_retry,failed_parse,failed_content,success_rate_first_try,success_rate_with_retry
-qwen2.5:1.5b,24,17,2,0,5,0.7083,0.7917
