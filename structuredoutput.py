@@ -1,8 +1,5 @@
 import json
 import re
-import time
-import csv
-import os
 from collections import Counter, defaultdict
 from decimal import Decimal, InvalidOperation
 from typing import Optional, List, Dict, Any, Tuple
@@ -356,100 +353,7 @@ def try_parse(raw: str) -> Tuple[Optional[RefundExtraction], Optional[str], Opti
         return None, "schema_validation_error", msg
 
 
-# def evaluate_once(model: str, case: Dict[str, Any]) -> Dict[str, Any]:
-#     attempts = []
-#     for attempt_no in [1, 2]:
-#         raw = call_model(model, case["ticket"], retry=(attempt_no == 2))
-#         parsed, parse_error, parse_detail = try_parse(raw)
-#         attempt = {
-#             "attempt": attempt_no,
-#             "raw": raw,
-#             "parse_error": parse_error,
-#             "parse_detail": parse_detail,
-#             "parsed": parsed.model_dump() if parsed else None,
-#         }
-#         attempts.append(attempt)
-#         if parsed is not None:
-#             pred = normalize_record(parsed.model_dump())
-#             exp = normalize_record(case["expected"])
-#             content_errors = classify_content_errors(pred, exp)
-#             if not content_errors:
-#                 return {
-#                     "status": "pass" if attempt_no == 1 else "pass_after_retry",
-#                     "attempts": attempts,
-#                     "final_prediction": pred,
-#                     "error_tags": [],
-#                 }
-#             if attempt_no == 2:
-#                 return {
-#                     "status": "fail_content",
-#                     "attempts": attempts,
-#                     "final_prediction": pred,
-#                     "error_tags": content_errors,
-#                 }
-#         else:
-#             if attempt_no == 2:
-#                 return {
-#                     "status": "fail_parse",
-#                     "attempts": attempts,
-#                     "final_prediction": None,
-#                     "error_tags": [attempts[-1]["parse_error"] or "unknown_parse_failure"],
-#                 }
-#     return {
-#         "status": "fail_unknown",
-#         "attempts": attempts,
-#         "final_prediction": None,
-#         "error_tags": ["unknown_failure"],
-#     }
 
-
-# def run_all() -> Dict[str, Any]:
-#     results = []
-#     summary = {}
-#     for model in MODELS:
-#         model_rows = []
-#         counter = Counter()
-#         by_category = defaultdict(Counter)
-#         for case in TEST_CASES:
-#             res = evaluate_once(model, case)
-#             row = {
-#                 "model": model,
-#                 "test_id": case["id"],
-#                 "category": case["category"],
-#                 "description": case["description"],
-#                 "status": res["status"],
-#                 "attempt_count": len(res["attempts"]),
-#                 "first_attempt_parse_error": res["attempts"][0]["parse_error"],
-#                 "second_attempt_parse_error": res["attempts"][1]["parse_error"] if len(res["attempts"]) > 1 else None,
-#                 "error_tags": "|".join(res["error_tags"]),
-#                 "expected": json.dumps(normalize_record(case["expected"]), ensure_ascii=False),
-#                 "predicted": json.dumps(res["final_prediction"], ensure_ascii=False) if res["final_prediction"] is not None else None,
-#                 "raw_first_attempt": res["attempts"][0]["raw"],
-#                 "raw_second_attempt": res["attempts"][1]["raw"] if len(res["attempts"]) > 1 else None,
-#             }
-#             model_rows.append(row)
-#             counter[res["status"]] += 1
-#             by_category[case["category"]][res["status"]] += 1
-#             for tag in res["error_tags"]:
-#                 counter[tag] += 1
-#                 by_category[case["category"]][tag] += 1
-#             first_parse = res["attempts"][0]["parse_error"]
-#             if first_parse:
-#                 counter[f"first_{first_parse}"] += 1
-#         total = len(TEST_CASES)
-#         summary[model] = {
-#             "total": total,
-#             "pass_first_try": counter["pass"],
-#             "pass_after_retry": counter["pass_after_retry"],
-#             "failed_parse": counter["fail_parse"],
-#             "failed_content": counter["fail_content"],
-#             "success_rate_first_try": round(counter["pass"] / total, 4),
-#             "success_rate_with_retry": round((counter["pass"] + counter["pass_after_retry"]) / total, 4),
-#             "error_breakdown": dict(sorted((k, v) for k, v in counter.items() if k not in {"pass", "pass_after_retry", "fail_parse", "fail_content"})),
-#             "category_breakdown": {k: dict(v) for k, v in by_category.items()},
-#         }
-#         results.extend(model_rows)
-#     return {"summary": summary, "rows": results}
 
 # Define your cascade architecture
 PRIMARY_MODEL = "qwen2.5:1.5b"
@@ -556,74 +460,6 @@ def run_all() -> Dict[str, Any]:
     
     return {"summary": summary, "rows": results}
 
-
-# def write_outputs(payload: Dict[str, Any]) -> None:
-#     os.makedirs("output", exist_ok=True)
-#     with open("output/model_eval_results.json", "w", encoding="utf-8") as f:
-#         json.dump(payload, f, indent=2, ensure_ascii=False)
-
-#     rows = payload["rows"]
-#     if rows:
-#         fieldnames = list(rows[0].keys())
-#         with open("output/model_eval_results.csv", "w", newline="", encoding="utf-8") as f:
-#             w = csv.DictWriter(f, fieldnames=fieldnames)
-#             w.writeheader()
-#             w.writerows(rows)
-
-#     summary_rows = []
-#     for model, s in payload["summary"].items():
-#         summary_rows.append({
-#             "model": model,
-#             "total": s["total"],
-#             "pass_first_try": s["pass_first_try"],
-#             "pass_after_retry": s["pass_after_retry"],
-#             "failed_parse": s["failed_parse"],
-#             "failed_content": s["failed_content"],
-#             "success_rate_first_try": s["success_rate_first_try"],
-#             "success_rate_with_retry": s["success_rate_with_retry"],
-#         })
-#     with open("output/model_eval_summary.csv", "w", newline="", encoding="utf-8") as f:
-#         w = csv.DictWriter(f, fieldnames=list(summary_rows[0].keys()))
-#         w.writeheader()
-#         w.writerows(summary_rows)
-
-#     md = []
-#     md.append("# Structured JSON Extraction Evaluation Report\n")
-#     md.append("This report compares three local models on refund-ticket structured extraction using Pydantic validation and a single retry policy.\n")
-#     md.append("## Overall results\n")
-#     md.append("| Model | Total | Pass 1st try | Pass after retry | Parse fails | Content fails | 1st try rate | With retry rate |")
-#     md.append("|---|---:|---:|---:|---:|---:|---:|---:|")
-#     for row in summary_rows:
-#         md.append(f"| {row['model']} | {row['total']} | {row['pass_first_try']} | {row['pass_after_retry']} | {row['failed_parse']} | {row['failed_content']} | {row['success_rate_first_try']:.2%} | {row['success_rate_with_retry']:.2%} |")
-#     md.append("\n## Error breakdown by model\n")
-#     for model, s in payload["summary"].items():
-#         md.append(f"### {model}\n")
-#         if not s["error_breakdown"]:
-#             md.append("No errors recorded.\n")
-#         else:
-#             md.append("| Error type | Count |")
-#             md.append("|---|---:|")
-#             for k, v in s["error_breakdown"].items():
-#                 md.append(f"| {k} | {v} |")
-#         md.append("")
-#     md.append("## Edge-case coverage\n")
-#     md.append("Test categories include happy path, missing fields, multiple candidates, forwarded/quoted chains, signature noise, negation, multilingual text, OCR noise, written amounts, currency variants, special-character names, fake JSON bait, and irrelevant refund mentions.\n")
-#     md.append("## Notes\n")
-#     md.append("- A pass requires valid JSON, valid Pydantic schema, and exact match against expected normalized fields.\n")
-#     md.append("- If the first response fails syntax or schema validation, the harness reprompts the model once before marking failure.\n")
-#     md.append("- `refund_amount` is normalized to 2 decimals; currency symbols are mapped to ISO codes when possible.\n")
-#     with open("output/model_eval_report.md", "w", encoding="utf-8") as f:
-#         f.write("\n".join(md))
-
-
-# def main():
-#     payload = run_all()
-#     write_outputs(payload)
-#     print(json.dumps(payload["summary"], indent=2))
-
-
-# if __name__ == "__main__":
-#     main()
 
 
 def write_outputs(payload: Dict[str, Any]) -> None:
