@@ -1,44 +1,50 @@
-PII Extraction Engine for refund tickets: Technical Documentation
-Overview
-The Problem: Extracting Personally Identifiable Information (PII)—specifically Name, Email, Refund Amount, and Currency—from unstructured customer support tickets.
-The Solution: An automated data extraction API utilizing Small Language Models (SLMs) to output structured JSON.
-Why SLMs?
+ PII Extraction Engine for Refund— Engineering Report
+1. Overview
+The Problem: Extracting Personally Identifiable Information (PII)—specifically Name, Email, Refund Amount, and Currency—from unstructured customer support tickets to detect and prevent refund fraud.
+The Solution: An automated, offline REST API utilizing Small Language Models (SLMs) and heuristic routing to output structured, validated JSON.
+Why Local SLMs?
 Data Privacy: Tickets contain sensitive PII. Local processing ensures data never leaves the internal network.
-Latency: Eliminates network round trips associated with cloud API calls.
-Cost per ticket: Zero cost per ticket compared to cloud-based token billing.
-Hardware Configuration
-Processor: Intel Core i5
-Memory: 16GB RAM (Integrated)
-Deployment: Local/Offline via Ollama
-Phase 1: Inference Metrics
-The Problem: Automation pipelines require high throughput. A model that is too slow creates a system bottleneck.
-The Test: Evaluated Llama 3.2 (1B), Qwen 2.5 (1.5B), Gemma 3 (1B), and DeepSeek-R1 for Time to First Token (TTFT) and Tokens Per Second (TPS).
-The Result: * DeepSeek-R1 was disqualified. Chain-of-Thought reasoning induced unacceptable latency.
-The remaining three models achieved speed parity, stabilizing between 18.5 and 22.3 TPS.
-All models experienced a cold start penalty. The first prompt required 3.0+ seconds. By the second prompt, TTFT decreased by 70% as the model remained loaded in shared memory.
-Phase 2: Structural Determinism
-The Problem: The pipeline requires perfectly structured JSON data. Creative text generation breaks database schemas.
-The Test: Model temperature was set to 0 to enforce structure. Models were tested against a 24-ticket dataset containing severe edge cases, including:
-Missing fields (name, email, amount)
-Multiple amounts or emails in one text
-Forwarded chains and quoted replies
+Latency: Eliminates network round trips and rate limits associated with cloud API calls.
+Cost: Zero marginal cost per ticket compared to cloud-based per-token billing.
+2. Deployment Environment
+Hardware: Intel Core i5 CPU
+Memory: 16GB Shared RAM
+Inference Engine: Local deployment via Ollama
+3. Evaluation Dataset
+To measure structural determinism and logic, models were evaluated against a custom 24-case adversarial benchmark suite. Test cases included:
+Missing core entities (name, email, amount)
+Multiple conflicting amounts or emails
+Deep forwarded chains and quoted replies
 Agent signature noise
-Negation (denied refunds)
-Multilingual text and OCR noise
-Amounts written in words
-Currency symbols versus ISO codes
-Extra JSON bait and markdown noise
-The Result: * Llama 3.2 (1B) was rejected for data omission.
-Gemma 3 (1B) was rejected for data hallucination.
-Qwen 2.5 (1.5B) was selected as the primary model for demonstrating the highest structural baseline.
-Phase 3: Prompt Engineering
-The Problem: Qwen 2.5 initially scored 58.3% accuracy. It failed to map currency symbols (like $) to text and failed complex formatting.
-The Solution: The system prompt was updated to explicitly map currency symbols to 3-letter ISO codes. Few-shot prompting was implemented, providing three distinct input/output JSON examples directly in the instructions.
-The Result: Accuracy increased to 79.1%.
-Phase 4: The Retry & Cascade Architecture
-The Problem: The 1.5B parameter model reached a hard accuracy limit at 79.1%. It occasionally outputs invalid JSON syntax. It also struggles with complex logic (like quoted email threads), causing it to miss core data.
-The Solution: A two-step safety net built directly into the API routing logic.
-The Retry Mechanism: When the primary model (Qwen 1.5B) outputs broken JSON, the system catches the error. It feeds the exact error text back to the model and reprompts it to fix the syntax.
-The LLM Cascade (Mitigation): If the retry fails, or if the model outputs valid JSON but misses core business data (like Name or Amount), the system intercepts the ticket. It automatically mitigates the query by routing it to a heavier fallback model: Llama 3.2 (3B).
-The Result: The 3B model successfully resolved the complex edge cases. This architecture pushed the final API accuracy to 83.3%. It processes most tickets at high speed and only uses heavier compute when absolutely necessary.
-
+Negation and denied refunds
+Multilingual text and OCR corruption
+Amounts written in English words
+Fake embedded JSON bait
+4. Phase 1: Inference & Hardware Benchmarking
+Objective: Ensure the models do not introduce unacceptable pipeline latency. Evaluated Llama 3.2 (1B), Qwen 2.5 (1.5B), Gemma 3 (1B), and DeepSeek-R1.
+Latency Overhead: DeepSeek-R1 was excluded from further testing. The internal Chain-of-Thought (CoT) reasoning induced unacceptable extraction delays.
+Throughput Parity: The remaining three models stabilized between 18.5 and 22.3 Tokens Per Second (TPS).
+Cold Start vs. Warm Start: Initial requests required 3.0+ seconds to load the model into memory. Subsequent requests dropped Time To First Token (TTFT) by 70%, validating that models must be kept persistently loaded for production use.
+5. Phase 2: Structural Determinism & Model Selection
+Objective: The pipeline requires strictly formatted data. Creative text generation breaks database schemas. Temperature was enforced at 0.0.
+Llama 3.2 (1B): Rejected for severe data omission (failed to extract explicitly stated entities).
+Gemma 3 (1B): Rejected for aggressive data hallucination (fabricated entities when faced with missing data).
+Final Primary Selection: Qwen 2.5 (1.5B). Selected for demonstrating the highest baseline structural integrity and adherence to JSON null outputs.
+6. Phase 3: Prompt Engineering
+Objective: Address the baseline 58.3% extraction accuracy of Qwen 2.5. The model failed to infer ISO codes and handled complex formatting poorly.
+Explicit Constraints: The system prompt was updated to strictly map currency symbols (e.g., "$", "₹") to 3-letter ISO codes.
+Few-Shot Prompting: Three distinct input/output JSON examples were injected directly into the instructions to handle specific edge cases.
+Result: Accuracy increased to 79.17%.
+7. Phase 4: Validation, Reflexion & The Cascade Architecture
+Objective: Overcome the 79.17% cognitive ceiling of the 1.5B parameter model and handle syntax crashes. Engineered a two-step safety net within the FastAPI routing logic.
+Output Validation: Every model response passes through strict Pydantic schema validation.
+The Reflexion Mechanism (Retry): When the primary model outputs invalid JSON syntax, Pydantic catches the exception. The script feeds the exact ValidationError text back to the model and reprompts it to repair the syntax.
+The LLM Cascade (Mitigation): If the schema is valid but the payload fails heuristic business checks (e.g., missing both Name and Amount, or identifying a quoted thread), the API intercepts the ticket. It routes the payload to a heavier fallback model: Meta Llama 3.2 (3B).
+Result: The 3B model successfully resolved complex contextual edge cases, pushing the final API accuracy to 83.3%.
+8. Known Limitations & Failure Modes
+The remaining failure margin primarily consists of semantic interpretation rather than system crashes:
+Obfuscated Data: Semantic normalization overrides strict nulls (e.g., converting "name at gmail dot com" to a valid email format).
+Entity Gravity: Strong entities (valid emails or dollar amounts) inside administrative or system notifications occasionally override negative constraints ("no customer action needed").
+9. Future Production Roadmap
+Human-in-the-Loop (HITL): Route low-confidence extractions or specific heuristic failures to a manual review queue.
+PostgreSQL Logging Pipeline: Log raw tickets, prompt versions, and extraction times to a relational database to monitor model drift and identify new edge cases.
